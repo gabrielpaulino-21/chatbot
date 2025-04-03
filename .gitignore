@@ -1,174 +1,85 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+!pip install langchain==0.3.0
+!pip install langchain-groq==0.2.0
+!pip install langchain-community==0.3.0
+!pip install youtube_transcript_api==0.6.2
+!pip install pypdf==5.0.0
 
-# C extensions
-*.so
+import os
+from langchain_groq import ChatGroq
+from langchain.prompts import ChatPromptTemplate
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+api_key = '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'
+os.environ['GROQ_API_KEY'] = api_key
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
+chat = ChatGroq(model='llama-3.3-70b-versatile')
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
+def resposta_bot (mensagens, documento):
+  mensagem_system = '''Você é um assistente amigável chamado Asimo.
+  Vopcê utiliza as seguintes informações para formular suas respostas: {informacoes}'''
+  mensagens_modelo = [('system', mensagem_system)]
+  mensagens_modelo += mensagens
+  template = ChatPromptTemplate.from_messages(mensagens_modelo)
+  chain = template | chat
+  return chain.invoke({'informacoes': documento}).content
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-cover/
+  from langchain_community.document_loaders import WebBaseLoader
+from langchain_community.document_loaders import YoutubeLoader
+from langchain_community.document_loaders import PyPDFLoader
 
-# Translations
-*.mo
-*.pot
+def carrega_site():
+  url_site = input('Digite a URL do site: ')
+  loader = WebBaseLoader(url_site)
+  lista_documentos = loader.load()
+  documento = ''
+  for doc in lista_documentos:
+    documento = documento + doc.page_content
+  return documento
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+def carrega_pdf():
+  caminho = '/content/drive/MyDrive/Colab Notebooks/Asimov/Python para IA: do zero ao primeiro chatbot/materiais/arquivos/RoteiroViagemEgito.pdf'
+  loader = PyPDFLoader(caminho)
+  lista_documentos = loader.load()
+  documento = ''
+  for doc in lista_documentos:
+    documento = documento + doc.page_content
+  return documento
 
-# Flask stuff:
-instance/
-.webassets-cache
+def carrega_youtube():
+  url_youtube = input('Digite a URL do vídeo: ')
+  loader = YoutubeLoader.from_youtube_url(url_youtube, language=['pt'])
+  lista_documentos = loader.load()
+  documento = ''
+  return documento
 
-# Scrapy stuff:
-.scrapy
+  print('Bem-vindo ao ChatBot da Asimo!')
 
-# Sphinx documentation
-docs/_build/
+texto_selecao = '''Digite 1 se você saber sobre um site.
+Digite 2 se você quiser saber sobre um pdf.
+Digite 3 se você quiser saber sobre um vído do YouTube.
+'''
 
-# PyBuilder
-.pybuilder/
-target/
+while True:
+  selecao = input(texto_selecao)
+  if selecao == '1':
+    documento = carrega_site()
+    break
+  elif selecao == '2':
+    documento = carrega_pdf()
+    break
+  elif selecao == '3':
+    documento = carrega_youtube()
+    break
+  print('Digite um valor entre 1 e 3')
 
-# Jupyter Notebook
-.ipynb_checkpoints
+mensagens = []
+while True:
+  pergunta = input('Usuário: ')
+  if pergunta.lower() == 'x':
+    break
+  mensagens.append(('user', pergunta))
+  resposta = resposta_bot(mensagens, documento)
+  mensagens.append(('assistant', resposta))
+  print(f'Bot: {resposta}')
 
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-#   For a library or package, you might want to ignore these files since the code is
-#   intended to run in multiple environments; otherwise, check them in:
-# .python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# UV
-#   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#uv.lock
-
-# poetry
-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
-#   This is especially recommended for binary packages to ensure reproducibility, and is more
-#   commonly ignored for libraries.
-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
-
-# pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
-#pdm.lock
-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it
-#   in version control.
-#   https://pdm.fming.dev/latest/usage/project/#working-with-version-control
-.pdm.toml
-.pdm-python
-.pdm-build/
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
-
-# pytype static type analyzer
-.pytype/
-
-# Cython debug symbols
-cython_debug/
-
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
-
-# Ruff stuff:
-.ruff_cache/
-
-# PyPI configuration file
-.pypirc
+print('Muito obrigado por utilizar o AsimoBot!')
+print(mensagens)
