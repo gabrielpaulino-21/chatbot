@@ -4,7 +4,7 @@ Detalhes do projeto:
 
 Funcionalidades:
 O chatbot é capaz de extrair informações relevantes de diferentes tipos de documentos e mídias.
-Permite aos usuários fazer perguntas e obter respostas precisas e automatizadas.
+Permite que o usuário faça perguntas e obter respostas precisas e automatizadas.
 Utiliza a biblioteca LangChain para integrar e manipular dados de forma eficiente.
 
 Tecnologias:
